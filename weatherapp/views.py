@@ -7,13 +7,14 @@ import json
 
 # Create your views here.
 def index(request):
+    '''The home page with form to input latitude, longitude and weather source(s)'''
     return render(request, 'weatherapp/index.html')
 
 def currentTemp(request):
-
+    '''Renders the average current temperature'''
     latitude, longitude, source = getLatLongSource(request)
 
-    if validateLatLon(latitude, longitude):
+    if validateLatLon(latitude, longitude) and source:
         average_current_temperature = calculateAvgTemp(latitude, longitude, source)
     else:
         # messages.info(request, 'Provide float values to Latitude and Longitude' )
@@ -23,7 +24,7 @@ def currentTemp(request):
     {'latitude':latitude, 'longitude':longitude, 'source':source, 'current_temp':average_current_temperature})
 
 def getLatLongSource(request):
-
+    '''Retrieves the values from the form'''
     lat = request.GET['Latitude']
     long = request.GET['Longitude']
     source = request.GET.getlist('source')
@@ -31,6 +32,7 @@ def getLatLongSource(request):
     return lat, long, source
 
 def validateLatLon(lat, long):
+    '''Validates if the latitude and longitude input values are of type float'''
     try:
         latitude = float(lat)
         longitude = float(long)
@@ -39,7 +41,7 @@ def validateLatLon(lat, long):
         return False
 
 def calculateAvgTemp(lat, long, source):
-
+    '''Calculates the current average temperature from various sources'''
     temp_celsius, temp_fahrenheit = getSourceTemp(lat, long, source)
 
     avg_temp_celius = sum(temp_celsius)/len(temp_celsius)
@@ -50,6 +52,7 @@ def calculateAvgTemp(lat, long, source):
     return json.dumps(final_output)
 
 def getSourceTemp(lat, long, source):
+    '''Retrieves current Temperature from each individual source'''
     temp_celsius = []
     temp_fahrenheit = []
 
@@ -67,7 +70,7 @@ def getSourceTemp(lat, long, source):
     return temp_celsius, temp_fahrenheit
 
 def currentTempAccu(lat, long):
-
+    '''Retrives the current temperature from Accuweather by interacting with external flask application'''
     output = requests.get('http://127.0.0.1:5000/accuweather?latitude={}&longitude={}'.format(lat, long))
     output_json = output.json()
 
@@ -77,7 +80,7 @@ def currentTempAccu(lat, long):
     return current_temp_celsius, current_temp_fahrenheit
 
 def currentTempNoaa(lat, long):
-
+    '''Retrieves the current temperature from NOAA by interacting with external flask application'''
     output = requests.get('http://127.0.0.1:5000/noaa?latlon={},{}'.format(lat, long))
     output_json = output.json()
 
@@ -87,13 +90,13 @@ def currentTempNoaa(lat, long):
     return current_temp_celsius, current_temp_fahrenheit
 
 def currentTempWeatherdotcom(lat, long):
-
+    '''Retrieves the current temperature from weatherdotcom by interacting with external flask application'''
     data = {'lat':lat,'lon':long}
 
     output = requests.post(url="http://127.0.0.1:5000/weatherdotcom", json=data)
 
     output_json = output.json()
-
+    '''If the temperature is in fahrenheit, calculates the celsius temperature and vice versa'''
     if output_json['query']['results']['channel']['units']['temperature'] == 'F':
         current_temp_fahrenheit = int(output_json['query']['results']['channel']['condition']['temp'])
         current_temp_celsius = (current_temp_fahrenheit - 32) * 5/9
