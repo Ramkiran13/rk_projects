@@ -1,5 +1,5 @@
 # Mock Weather app
-Django project interacting with third party weather application(s) and displays current temperature
+Django project that interacts with third party weather application(s) and displays current temperature
 
 ### Setup
 ```
