@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import requests, json
+from django.core import serializers
+
+import requests
+import json
 
 # Create your views here.
 def index(request):
@@ -49,11 +52,11 @@ def calculate_avg_temp(lat, long, source):
 
         elif source == 'weatherdotcom':
 
+            # json_data = serializers.deserialize("json", {"lat":lat,"long":long}, ignorenonexistent=True)
+            data = {'lat':lat,'lon':long}
 
-            data = {"lat":float(lat),"long":float(long)}
-            print(data)
-            output3 = requests.post(url = "http://127.0.0.1:5000/weatherdotcom", json=json.dumps(data))
-            print(output3)
+            output3 = requests.post(url="http://127.0.0.1:5000/weatherdotcom", json=data)
+            print(output3.text)
             output_json3 = output3.json()
             print(output_json3)
             if output_json3['query']['results']['channel']['units']['temperature'] == 'F':
@@ -77,4 +80,4 @@ def calculate_avg_temp(lat, long, source):
 
     final_output = {"current_temperature_celsius":avg_temp_celius, "current_temperature_fahrenheit":avg_temp_fahrenheit}
 
-    return final_output
+    return json.dumps(final_output)
