@@ -13,8 +13,8 @@ python manage.py runserver
 
 Local server URL: 127.0.0.1:8000/
 
-/ (Index) - contains the form to input latitude, longitude and weather Sources
-/currentTemp - redirects to display the current temperature
+1. / (Index) - contains the form to input latitude, longitude and weather Sources
+2. /currentTemp - redirects to display the current temperature
 
 ### Input
 
